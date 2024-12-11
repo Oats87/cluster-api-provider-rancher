@@ -1,0 +1,1492 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  labels:
+    cluster.x-k8s.io/v1beta1: v1
+  name: rkecontrolplanes.rke.cattle.io
+spec:
+  group: rke.cattle.io
+  names:
+    kind: RKEControlPlane
+    listKind: RKEControlPlaneList
+    plural: rkecontrolplanes
+    singular: rkecontrolplane
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              additionalManifest:
+                type: string
+              agentEnvVars:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    value:
+                      type: string
+                  type: object
+                type: array
+              chartValues:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              clusterName:
+                type: string
+              dataDirectories:
+                description: DataDirectories contains the configuration for the data
+                  directories typically stored within /var/lib/rancher.
+                properties:
+                  k8sDistro:
+                    description: Data directory for the k8s distro
+                    type: string
+                  provisioning:
+                    description: Data directory for provisioning related files (idempotency)
+                    type: string
+                  systemAgent:
+                    description: Data directory for the system-agent connection info
+                      and plans
+                    type: string
+                type: object
+              etcd:
+                properties:
+                  disableSnapshots:
+                    type: boolean
+                  s3:
+                    properties:
+                      bucket:
+                        type: string
+                      cloudCredentialName:
+                        type: string
+                      endpoint:
+                        type: string
+                      endpointCA:
+                        type: string
+                      folder:
+                        type: string
+                      region:
+                        type: string
+                      skipSSLVerify:
+                        type: boolean
+                    type: object
+                  snapshotRetention:
+                    type: integer
+                  snapshotScheduleCron:
+                    type: string
+                type: object
+              etcdSnapshotCreate:
+                properties:
+                  generation:
+                    description: Changing the Generation is the only thing required
+                      to initiate a snapshot creation.
+                    type: integer
+                type: object
+              etcdSnapshotRestore:
+                properties:
+                  generation:
+                    description: Changing the Generation is the only thing required
+                      to initiate a snapshot restore.
+                    type: integer
+                  name:
+                    description: Name refers to the name of the associated etcdsnapshot
+                      object
+                    type: string
+                  restoreRKEConfig:
+                    description: Set to either none (or empty string), all, or kubernetesVersion
+                    type: string
+                type: object
+              infrastructureRef:
+                description: |-
+                  InfrastructureRef is a required reference to a custom resource
+                  offered by an infrastructure provider.
+                properties:
+                  apiVersion:
+                    description: API version of the referent.
+                    type: string
+                  fieldPath:
+                    description: |-
+                      If referring to a piece of an object instead of an entire object, this string
+                      should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2].
+                      For example, if the object reference is to a container within a pod, this would take on a value like:
+                      "spec.containers{name}" (where "name" refers to the name of the container that triggered
+                      the event) or if no container name is specified "spec.containers[2]" (container with
+                      index 2 in this pod). This syntax is chosen only to have some well-defined way of
+                      referencing a part of an object.
+                      TODO: this design is not final and this field is subject to change in the future.
+                    type: string
+                  kind:
+                    description: |-
+                      Kind of the referent.
+                      More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+                    type: string
+                  name:
+                    description: |-
+                      Name of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                    type: string
+                  namespace:
+                    description: |-
+                      Namespace of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+                    type: string
+                  resourceVersion:
+                    description: |-
+                      Specific resourceVersion to which this reference is made, if any.
+                      More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+                    type: string
+                  uid:
+                    description: |-
+                      UID of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
+              kubernetesVersion:
+                type: string
+              localClusterAuthEndpoint:
+                properties:
+                  caCerts:
+                    type: string
+                  enabled:
+                    type: boolean
+                  fqdn:
+                    type: string
+                type: object
+              machineGlobalConfig:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              machineSelectorConfig:
+                items:
+                  properties:
+                    config:
+                      type: object
+                    machineLabelSelector:
+                      description: |-
+                        A label selector is a label query over a set of resources. The result of matchLabels and
+                        matchExpressions are ANDed. An empty label selector matches all objects. A null
+                        label selector matches no objects.
+                      properties:
+                        matchExpressions:
+                          description: matchExpressions is a list of label selector
+                            requirements. The requirements are ANDed.
+                          items:
+                            description: |-
+                              A label selector requirement is a selector that contains values, a key, and an operator that
+                              relates the key and values.
+                            properties:
+                              key:
+                                description: key is the label key that the selector
+                                  applies to.
+                                type: string
+                              operator:
+                                description: |-
+                                  operator represents a key's relationship to a set of values.
+                                  Valid operators are In, NotIn, Exists and DoesNotExist.
+                                type: string
+                              values:
+                                description: |-
+                                  values is an array of string values. If the operator is In or NotIn,
+                                  the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                  the values array must be empty. This array is replaced during a strategic
+                                  merge patch.
+                                items:
+                                  type: string
+                                type: array
+                                x-kubernetes-list-type: atomic
+                            required:
+                            - key
+                            - operator
+                            type: object
+                          type: array
+                          x-kubernetes-list-type: atomic
+                        matchLabels:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels
+                            map is equivalent to an element of matchExpressions, whose key field is "key", the
+                            operator is "In", and the values array contains only "value". The requirements are ANDed.
+                          type: object
+                      type: object
+                      x-kubernetes-map-type: atomic
+                  type: object
+                type: array
+              machineSelectorFiles:
+                items:
+                  properties:
+                    fileSources:
+                      items:
+                        properties:
+                          configMap:
+                            properties:
+                              defaultPermissions:
+                                type: string
+                              items:
+                                items:
+                                  properties:
+                                    dynamic:
+                                      type: boolean
+                                    hash:
+                                      type: string
+                                    key:
+                                      type: string
+                                    path:
+                                      type: string
+                                    permissions:
+                                      type: string
+                                  required:
+                                  - key
+                                  - path
+                                  type: object
+                                type: array
+                              name:
+                                type: string
+                            required:
+                            - name
+                            type: object
+                          secret:
+                            properties:
+                              defaultPermissions:
+                                type: string
+                              items:
+                                items:
+                                  properties:
+                                    dynamic:
+                                      type: boolean
+                                    hash:
+                                      type: string
+                                    key:
+                                      type: string
+                                    path:
+                                      type: string
+                                    permissions:
+                                      type: string
+                                  required:
+                                  - key
+                                  - path
+                                  type: object
+                                type: array
+                              name:
+                                type: string
+                            required:
+                            - name
+                            type: object
+                        type: object
+                      type: array
+                    machineLabelSelector:
+                      description: |-
+                        A label selector is a label query over a set of resources. The result of matchLabels and
+                        matchExpressions are ANDed. An empty label selector matches all objects. A null
+                        label selector matches no objects.
+                      properties:
+                        matchExpressions:
+                          description: matchExpressions is a list of label selector
+                            requirements. The requirements are ANDed.
+                          items:
+                            description: |-
+                              A label selector requirement is a selector that contains values, a key, and an operator that
+                              relates the key and values.
+                            properties:
+                              key:
+                                description: key is the label key that the selector
+                                  applies to.
+                                type: string
+                              operator:
+                                description: |-
+                                  operator represents a key's relationship to a set of values.
+                                  Valid operators are In, NotIn, Exists and DoesNotExist.
+                                type: string
+                              values:
+                                description: |-
+                                  values is an array of string values. If the operator is In or NotIn,
+                                  the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                  the values array must be empty. This array is replaced during a strategic
+                                  merge patch.
+                                items:
+                                  type: string
+                                type: array
+                                x-kubernetes-list-type: atomic
+                            required:
+                            - key
+                            - operator
+                            type: object
+                          type: array
+                          x-kubernetes-list-type: atomic
+                        matchLabels:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels
+                            map is equivalent to an element of matchExpressions, whose key field is "key", the
+                            operator is "In", and the values array contains only "value". The requirements are ANDed.
+                          type: object
+                      type: object
+                      x-kubernetes-map-type: atomic
+                  type: object
+                type: array
+              machineTemplate:
+                description: |-
+                  MachineTemplate contains information about how machines
+                  should be shaped when creating or updating a control plane.
+                properties:
+                  infrastructureRef:
+                    description: |-
+                      InfrastructureRef is a required reference to a custom resource
+                      offered by an infrastructure provider.
+                    properties:
+                      apiVersion:
+                        description: API version of the referent.
+                        type: string
+                      fieldPath:
+                        description: |-
+                          If referring to a piece of an object instead of an entire object, this string
+                          should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2].
+                          For example, if the object reference is to a container within a pod, this would take on a value like:
+                          "spec.containers{name}" (where "name" refers to the name of the container that triggered
+                          the event) or if no container name is specified "spec.containers[2]" (container with
+                          index 2 in this pod). This syntax is chosen only to have some well-defined way of
+                          referencing a part of an object.
+                          TODO: this design is not final and this field is subject to change in the future.
+                        type: string
+                      kind:
+                        description: |-
+                          Kind of the referent.
+                          More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+                        type: string
+                      name:
+                        description: |-
+                          Name of the referent.
+                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace of the referent.
+                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+                        type: string
+                      resourceVersion:
+                        description: |-
+                          Specific resourceVersion to which this reference is made, if any.
+                          More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+                        type: string
+                      uid:
+                        description: |-
+                          UID of the referent.
+                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
+                        type: string
+                    type: object
+                    x-kubernetes-map-type: atomic
+                  metadata:
+                    description: |-
+                      Standard object's metadata.
+                      More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
+                    properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        description: |-
+                          Annotations is an unstructured key value map stored with a resource that may be
+                          set by external tools to store and retrieve arbitrary metadata. They are not
+                          queryable and should be preserved when modifying objects.
+                          More info: http://kubernetes.io/docs/user-guide/annotations
+                        type: object
+                      labels:
+                        additionalProperties:
+                          type: string
+                        description: |-
+                          Map of string keys and values that can be used to organize and categorize
+                          (scope and select) objects. May match selectors of replication controllers
+                          and services.
+                          More info: http://kubernetes.io/docs/user-guide/labels
+                        type: object
+                    type: object
+                  nodeDrainTimeout:
+                    description: |-
+                      NodeDrainTimeout is the total amount of time that the controller will spend on draining a controlplane node
+                      The default value is 0, meaning that the node can be drained without any time limitations.
+                      NOTE: NodeDrainTimeout is different from `kubectl drain --timeout`
+                    type: string
+                required:
+                - infrastructureRef
+                type: object
+              managementClusterName:
+                type: string
+              networking:
+                description: Networking contains information regarding the desired
+                  and actual networking stack of the cluster.
+                properties:
+                  stackPreference:
+                    description: |-
+                      Specifies which networking stack to prefer for external cluster communication. In practice, this is used by the
+                      planner to render the various probes to force IPv4, IPv6, or default to localhost. There is currently no
+                      sanitization or validation as cluster configuration can be specified with machineGlobalConfig and
+                      machineSelectorConfig, which although easy to instrument to determine a potential interface, user defined
+                      configuration can be specified in the `/etc/rancher/<rke2/k3s>/config.yaml.d` directory either manually or via
+                      cloud-init, and there is currently no mechanism to extract the completely rendered configuration via the planner
+                      nor various engines themselves.
+                    type: string
+                type: object
+              provisionGeneration:
+                description: Increment to force all nodes to re-provision
+                type: integer
+              registries:
+                description: Registry is registry settings configured
+                properties:
+                  configs:
+                    additionalProperties:
+                      description: RegistryConfig contains configuration used to communicate
+                        with the registry.
+                      properties:
+                        authConfigSecretName:
+                          description: Auth contains information to authenticate to
+                            the registry.
+                          type: string
+                        caBundle:
+                          format: byte
+                          type: string
+                        insecureSkipVerify:
+                          type: boolean
+                        tlsSecretName:
+                          description: |-
+                            TLS is a pair of Cert/Key which then are used when creating the transport
+                            that communicates with the registry.
+                          type: string
+                      type: object
+                    description: |-
+                      Configs are configs for each registry.
+                      The key is the FDQN or IP of the registry.
+                    type: object
+                  mirrors:
+                    additionalProperties:
+                      description: Mirror contains the config related to the registry
+                        mirror
+                      properties:
+                        endpoint:
+                          description: |-
+                            Endpoints are endpoints for a namespace. CRI plugin will try the endpoints
+                            one by one until a working one is found. The endpoint must be a valid url
+                            with host specified.
+                            The scheme, host and path from the endpoint URL will be used.
+                          items:
+                            type: string
+                          type: array
+                        rewrite:
+                          additionalProperties:
+                            type: string
+                          description: |-
+                            Rewrites are repository rewrite rules for a namespace. When fetching image resources
+                            from an endpoint and a key matches the repository via regular expression matching
+                            it will be replaced with the corresponding value from the map in the resource request.
+                          type: object
+                      type: object
+                    description: Mirrors are namespace to mirror mapping for all namespaces.
+                    type: object
+                type: object
+              replicas:
+                description: Replicas is the number of replicas for the Control Plane.
+                format: int32
+                type: integer
+              rolloutStrategy:
+                description: The RolloutStrategy to use to replace control plane machines
+                  with new ones.
+                properties:
+                  rollingUpdate:
+                    description: Rolling update config params. Present only if RolloutStrategyType
+                      = RollingUpdate.
+                    properties:
+                      maxSurge:
+                        anyOf:
+                        - type: integer
+                        - type: string
+                        description: |-
+                          The maximum number of control planes that can be scheduled above or under the
+                          desired number of control planes.
+                          Value can be an absolute number 1 or 0.
+                          Defaults to 1.
+                          Example: when this is set to 1, the control plane can be scaled
+                          up immediately when the rolling update starts.
+                        x-kubernetes-int-or-string: true
+                    type: object
+                  type:
+                    description: |-
+                      Type of rollout. Currently the only supported strategy is "RollingUpdate".
+                      Default is RollingUpdate.
+                    type: string
+                type: object
+              rotateCertificates:
+                properties:
+                  generation:
+                    format: int64
+                    type: integer
+                  services:
+                    items:
+                      type: string
+                    type: array
+                type: object
+              rotateEncryptionKeys:
+                properties:
+                  generation:
+                    format: int64
+                    type: integer
+                type: object
+              unmanagedConfig:
+                type: boolean
+              upgradeStrategy:
+                properties:
+                  controlPlaneConcurrency:
+                    description: |-
+                      How many controlplane nodes should be upgrade at time, defaults to 1, 0 is infinite. Percentages are
+                      accepted too.
+                    type: string
+                  controlPlaneDrainOptions:
+                    properties:
+                      deleteEmptyDirData:
+                        description: Continue even if there are pods using emptyDir
+                        type: boolean
+                      disableEviction:
+                        description: DisableEviction forces drain to use delete rather
+                          than evict
+                        type: boolean
+                      enabled:
+                        description: Enable will require nodes be drained before upgrade
+                        type: boolean
+                      force:
+                        description: |-
+                          Drain node even if there are pods not managed by a ReplicationController, Job, or DaemonSet
+                          Drain will not proceed without Force set to true if there are such pods
+                        type: boolean
+                      gracePeriod:
+                        description: |-
+                          Period of time in seconds given to each pod to terminate gracefully.
+                          If negative, the default value specified in the pod will be used
+                        type: integer
+                      ignoreDaemonSets:
+                        description: |-
+                          If there are DaemonSet-managed pods, drain will not proceed without IgnoreDaemonSets set to true
+                          (even when set to true, kubectl won't delete pods - so setting default to true)
+                        type: boolean
+                      ignoreErrors:
+                        description: IgnoreErrors Ignore errors occurred between drain
+                          nodes in group
+                        type: boolean
+                      postDrainHooks:
+                        description: PostDrainHook A list of hooks to run after draining
+                          AND UPDATING a node
+                        items:
+                          properties:
+                            annotation:
+                              description: |-
+                                Annotation This annotation will need to be populated on the machine-plan secret with the value from the annotation
+                                "rke.cattle.io/pre-drain" before the planner will continue with drain the specific node.  The annotation
+                                "rke.cattle.io/pre-drain" is used for pre-drain and "rke.cattle.io/post-drain" is used for post drain.
+                              type: string
+                          type: object
+                        type: array
+                      preDrainHooks:
+                        description: PreDrainHooks A list of hooks to run prior to
+                          draining a node
+                        items:
+                          properties:
+                            annotation:
+                              description: |-
+                                Annotation This annotation will need to be populated on the machine-plan secret with the value from the annotation
+                                "rke.cattle.io/pre-drain" before the planner will continue with drain the specific node.  The annotation
+                                "rke.cattle.io/pre-drain" is used for pre-drain and "rke.cattle.io/post-drain" is used for post drain.
+                              type: string
+                          type: object
+                        type: array
+                      skipWaitForDeleteTimeoutSeconds:
+                        description: SkipWaitForDeleteTimeoutSeconds If pod DeletionTimestamp
+                          older than N seconds, skip waiting for the pod.  Seconds
+                          must be greater than 0 to skip.
+                        type: integer
+                      timeout:
+                        description: Time to wait (in seconds) before giving up for
+                          one try
+                        type: integer
+                    type: object
+                  workerConcurrency:
+                    description: How many workers should be upgraded at a time
+                    type: string
+                  workerDrainOptions:
+                    properties:
+                      deleteEmptyDirData:
+                        description: Continue even if there are pods using emptyDir
+                        type: boolean
+                      disableEviction:
+                        description: DisableEviction forces drain to use delete rather
+                          than evict
+                        type: boolean
+                      enabled:
+                        description: Enable will require nodes be drained before upgrade
+                        type: boolean
+                      force:
+                        description: |-
+                          Drain node even if there are pods not managed by a ReplicationController, Job, or DaemonSet
+                          Drain will not proceed without Force set to true if there are such pods
+                        type: boolean
+                      gracePeriod:
+                        description: |-
+                          Period of time in seconds given to each pod to terminate gracefully.
+                          If negative, the default value specified in the pod will be used
+                        type: integer
+                      ignoreDaemonSets:
+                        description: |-
+                          If there are DaemonSet-managed pods, drain will not proceed without IgnoreDaemonSets set to true
+                          (even when set to true, kubectl won't delete pods - so setting default to true)
+                        type: boolean
+                      ignoreErrors:
+                        description: IgnoreErrors Ignore errors occurred between drain
+                          nodes in group
+                        type: boolean
+                      postDrainHooks:
+                        description: PostDrainHook A list of hooks to run after draining
+                          AND UPDATING a node
+                        items:
+                          properties:
+                            annotation:
+                              description: |-
+                                Annotation This annotation will need to be populated on the machine-plan secret with the value from the annotation
+                                "rke.cattle.io/pre-drain" before the planner will continue with drain the specific node.  The annotation
+                                "rke.cattle.io/pre-drain" is used for pre-drain and "rke.cattle.io/post-drain" is used for post drain.
+                              type: string
+                          type: object
+                        type: array
+                      preDrainHooks:
+                        description: PreDrainHooks A list of hooks to run prior to
+                          draining a node
+                        items:
+                          properties:
+                            annotation:
+                              description: |-
+                                Annotation This annotation will need to be populated on the machine-plan secret with the value from the annotation
+                                "rke.cattle.io/pre-drain" before the planner will continue with drain the specific node.  The annotation
+                                "rke.cattle.io/pre-drain" is used for pre-drain and "rke.cattle.io/post-drain" is used for post drain.
+                              type: string
+                          type: object
+                        type: array
+                      skipWaitForDeleteTimeoutSeconds:
+                        description: SkipWaitForDeleteTimeoutSeconds If pod DeletionTimestamp
+                          older than N seconds, skip waiting for the pod.  Seconds
+                          must be greater than 0 to skip.
+                        type: integer
+                      timeout:
+                        description: Time to wait (in seconds) before giving up for
+                          one try
+                        type: integer
+                    type: object
+                type: object
+              version:
+                pattern: (v\d\.\d{2}\.\d+\+rke2r\d)|^$
+                type: string
+            required:
+            - localClusterAuthEndpoint
+            type: object
+          status:
+            properties:
+              agentConnected:
+                type: boolean
+              appliedSpec:
+                properties:
+                  additionalManifest:
+                    type: string
+                  agentEnvVars:
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        value:
+                          type: string
+                      type: object
+                    type: array
+                  chartValues:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  clusterName:
+                    type: string
+                  dataDirectories:
+                    description: DataDirectories contains the configuration for the
+                      data directories typically stored within /var/lib/rancher.
+                    properties:
+                      k8sDistro:
+                        description: Data directory for the k8s distro
+                        type: string
+                      provisioning:
+                        description: Data directory for provisioning related files
+                          (idempotency)
+                        type: string
+                      systemAgent:
+                        description: Data directory for the system-agent connection
+                          info and plans
+                        type: string
+                    type: object
+                  etcd:
+                    properties:
+                      disableSnapshots:
+                        type: boolean
+                      s3:
+                        properties:
+                          bucket:
+                            type: string
+                          cloudCredentialName:
+                            type: string
+                          endpoint:
+                            type: string
+                          endpointCA:
+                            type: string
+                          folder:
+                            type: string
+                          region:
+                            type: string
+                          skipSSLVerify:
+                            type: boolean
+                        type: object
+                      snapshotRetention:
+                        type: integer
+                      snapshotScheduleCron:
+                        type: string
+                    type: object
+                  etcdSnapshotCreate:
+                    properties:
+                      generation:
+                        description: Changing the Generation is the only thing required
+                          to initiate a snapshot creation.
+                        type: integer
+                    type: object
+                  etcdSnapshotRestore:
+                    properties:
+                      generation:
+                        description: Changing the Generation is the only thing required
+                          to initiate a snapshot restore.
+                        type: integer
+                      name:
+                        description: Name refers to the name of the associated etcdsnapshot
+                          object
+                        type: string
+                      restoreRKEConfig:
+                        description: Set to either none (or empty string), all, or
+                          kubernetesVersion
+                        type: string
+                    type: object
+                  infrastructureRef:
+                    description: |-
+                      InfrastructureRef is a required reference to a custom resource
+                      offered by an infrastructure provider.
+                    properties:
+                      apiVersion:
+                        description: API version of the referent.
+                        type: string
+                      fieldPath:
+                        description: |-
+                          If referring to a piece of an object instead of an entire object, this string
+                          should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2].
+                          For example, if the object reference is to a container within a pod, this would take on a value like:
+                          "spec.containers{name}" (where "name" refers to the name of the container that triggered
+                          the event) or if no container name is specified "spec.containers[2]" (container with
+                          index 2 in this pod). This syntax is chosen only to have some well-defined way of
+                          referencing a part of an object.
+                          TODO: this design is not final and this field is subject to change in the future.
+                        type: string
+                      kind:
+                        description: |-
+                          Kind of the referent.
+                          More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+                        type: string
+                      name:
+                        description: |-
+                          Name of the referent.
+                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                        type: string
+                      namespace:
+                        description: |-
+                          Namespace of the referent.
+                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+                        type: string
+                      resourceVersion:
+                        description: |-
+                          Specific resourceVersion to which this reference is made, if any.
+                          More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+                        type: string
+                      uid:
+                        description: |-
+                          UID of the referent.
+                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
+                        type: string
+                    type: object
+                    x-kubernetes-map-type: atomic
+                  kubernetesVersion:
+                    type: string
+                  localClusterAuthEndpoint:
+                    properties:
+                      caCerts:
+                        type: string
+                      enabled:
+                        type: boolean
+                      fqdn:
+                        type: string
+                    type: object
+                  machineGlobalConfig:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  machineSelectorConfig:
+                    items:
+                      properties:
+                        config:
+                          type: object
+                        machineLabelSelector:
+                          description: |-
+                            A label selector is a label query over a set of resources. The result of matchLabels and
+                            matchExpressions are ANDed. An empty label selector matches all objects. A null
+                            label selector matches no objects.
+                          properties:
+                            matchExpressions:
+                              description: matchExpressions is a list of label selector
+                                requirements. The requirements are ANDed.
+                              items:
+                                description: |-
+                                  A label selector requirement is a selector that contains values, a key, and an operator that
+                                  relates the key and values.
+                                properties:
+                                  key:
+                                    description: key is the label key that the selector
+                                      applies to.
+                                    type: string
+                                  operator:
+                                    description: |-
+                                      operator represents a key's relationship to a set of values.
+                                      Valid operators are In, NotIn, Exists and DoesNotExist.
+                                    type: string
+                                  values:
+                                    description: |-
+                                      values is an array of string values. If the operator is In or NotIn,
+                                      the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                      the values array must be empty. This array is replaced during a strategic
+                                      merge patch.
+                                    items:
+                                      type: string
+                                    type: array
+                                    x-kubernetes-list-type: atomic
+                                required:
+                                - key
+                                - operator
+                                type: object
+                              type: array
+                              x-kubernetes-list-type: atomic
+                            matchLabels:
+                              additionalProperties:
+                                type: string
+                              description: |-
+                                matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels
+                                map is equivalent to an element of matchExpressions, whose key field is "key", the
+                                operator is "In", and the values array contains only "value". The requirements are ANDed.
+                              type: object
+                          type: object
+                          x-kubernetes-map-type: atomic
+                      type: object
+                    type: array
+                  machineSelectorFiles:
+                    items:
+                      properties:
+                        fileSources:
+                          items:
+                            properties:
+                              configMap:
+                                properties:
+                                  defaultPermissions:
+                                    type: string
+                                  items:
+                                    items:
+                                      properties:
+                                        dynamic:
+                                          type: boolean
+                                        hash:
+                                          type: string
+                                        key:
+                                          type: string
+                                        path:
+                                          type: string
+                                        permissions:
+                                          type: string
+                                      required:
+                                      - key
+                                      - path
+                                      type: object
+                                    type: array
+                                  name:
+                                    type: string
+                                required:
+                                - name
+                                type: object
+                              secret:
+                                properties:
+                                  defaultPermissions:
+                                    type: string
+                                  items:
+                                    items:
+                                      properties:
+                                        dynamic:
+                                          type: boolean
+                                        hash:
+                                          type: string
+                                        key:
+                                          type: string
+                                        path:
+                                          type: string
+                                        permissions:
+                                          type: string
+                                      required:
+                                      - key
+                                      - path
+                                      type: object
+                                    type: array
+                                  name:
+                                    type: string
+                                required:
+                                - name
+                                type: object
+                            type: object
+                          type: array
+                        machineLabelSelector:
+                          description: |-
+                            A label selector is a label query over a set of resources. The result of matchLabels and
+                            matchExpressions are ANDed. An empty label selector matches all objects. A null
+                            label selector matches no objects.
+                          properties:
+                            matchExpressions:
+                              description: matchExpressions is a list of label selector
+                                requirements. The requirements are ANDed.
+                              items:
+                                description: |-
+                                  A label selector requirement is a selector that contains values, a key, and an operator that
+                                  relates the key and values.
+                                properties:
+                                  key:
+                                    description: key is the label key that the selector
+                                      applies to.
+                                    type: string
+                                  operator:
+                                    description: |-
+                                      operator represents a key's relationship to a set of values.
+                                      Valid operators are In, NotIn, Exists and DoesNotExist.
+                                    type: string
+                                  values:
+                                    description: |-
+                                      values is an array of string values. If the operator is In or NotIn,
+                                      the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                      the values array must be empty. This array is replaced during a strategic
+                                      merge patch.
+                                    items:
+                                      type: string
+                                    type: array
+                                    x-kubernetes-list-type: atomic
+                                required:
+                                - key
+                                - operator
+                                type: object
+                              type: array
+                              x-kubernetes-list-type: atomic
+                            matchLabels:
+                              additionalProperties:
+                                type: string
+                              description: |-
+                                matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels
+                                map is equivalent to an element of matchExpressions, whose key field is "key", the
+                                operator is "In", and the values array contains only "value". The requirements are ANDed.
+                              type: object
+                          type: object
+                          x-kubernetes-map-type: atomic
+                      type: object
+                    type: array
+                  machineTemplate:
+                    description: |-
+                      MachineTemplate contains information about how machines
+                      should be shaped when creating or updating a control plane.
+                    properties:
+                      infrastructureRef:
+                        description: |-
+                          InfrastructureRef is a required reference to a custom resource
+                          offered by an infrastructure provider.
+                        properties:
+                          apiVersion:
+                            description: API version of the referent.
+                            type: string
+                          fieldPath:
+                            description: |-
+                              If referring to a piece of an object instead of an entire object, this string
+                              should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2].
+                              For example, if the object reference is to a container within a pod, this would take on a value like:
+                              "spec.containers{name}" (where "name" refers to the name of the container that triggered
+                              the event) or if no container name is specified "spec.containers[2]" (container with
+                              index 2 in this pod). This syntax is chosen only to have some well-defined way of
+                              referencing a part of an object.
+                              TODO: this design is not final and this field is subject to change in the future.
+                            type: string
+                          kind:
+                            description: |-
+                              Kind of the referent.
+                              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+                            type: string
+                          name:
+                            description: |-
+                              Name of the referent.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          namespace:
+                            description: |-
+                              Namespace of the referent.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+                            type: string
+                          resourceVersion:
+                            description: |-
+                              Specific resourceVersion to which this reference is made, if any.
+                              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+                            type: string
+                          uid:
+                            description: |-
+                              UID of the referent.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      metadata:
+                        description: |-
+                          Standard object's metadata.
+                          More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            description: |-
+                              Annotations is an unstructured key value map stored with a resource that may be
+                              set by external tools to store and retrieve arbitrary metadata. They are not
+                              queryable and should be preserved when modifying objects.
+                              More info: http://kubernetes.io/docs/user-guide/annotations
+                            type: object
+                          labels:
+                            additionalProperties:
+                              type: string
+                            description: |-
+                              Map of string keys and values that can be used to organize and categorize
+                              (scope and select) objects. May match selectors of replication controllers
+                              and services.
+                              More info: http://kubernetes.io/docs/user-guide/labels
+                            type: object
+                        type: object
+                      nodeDrainTimeout:
+                        description: |-
+                          NodeDrainTimeout is the total amount of time that the controller will spend on draining a controlplane node
+                          The default value is 0, meaning that the node can be drained without any time limitations.
+                          NOTE: NodeDrainTimeout is different from `kubectl drain --timeout`
+                        type: string
+                    required:
+                    - infrastructureRef
+                    type: object
+                  managementClusterName:
+                    type: string
+                  networking:
+                    description: Networking contains information regarding the desired
+                      and actual networking stack of the cluster.
+                    properties:
+                      stackPreference:
+                        description: |-
+                          Specifies which networking stack to prefer for external cluster communication. In practice, this is used by the
+                          planner to render the various probes to force IPv4, IPv6, or default to localhost. There is currently no
+                          sanitization or validation as cluster configuration can be specified with machineGlobalConfig and
+                          machineSelectorConfig, which although easy to instrument to determine a potential interface, user defined
+                          configuration can be specified in the `/etc/rancher/<rke2/k3s>/config.yaml.d` directory either manually or via
+                          cloud-init, and there is currently no mechanism to extract the completely rendered configuration via the planner
+                          nor various engines themselves.
+                        type: string
+                    type: object
+                  provisionGeneration:
+                    description: Increment to force all nodes to re-provision
+                    type: integer
+                  registries:
+                    description: Registry is registry settings configured
+                    properties:
+                      configs:
+                        additionalProperties:
+                          description: RegistryConfig contains configuration used
+                            to communicate with the registry.
+                          properties:
+                            authConfigSecretName:
+                              description: Auth contains information to authenticate
+                                to the registry.
+                              type: string
+                            caBundle:
+                              format: byte
+                              type: string
+                            insecureSkipVerify:
+                              type: boolean
+                            tlsSecretName:
+                              description: |-
+                                TLS is a pair of Cert/Key which then are used when creating the transport
+                                that communicates with the registry.
+                              type: string
+                          type: object
+                        description: |-
+                          Configs are configs for each registry.
+                          The key is the FDQN or IP of the registry.
+                        type: object
+                      mirrors:
+                        additionalProperties:
+                          description: Mirror contains the config related to the registry
+                            mirror
+                          properties:
+                            endpoint:
+                              description: |-
+                                Endpoints are endpoints for a namespace. CRI plugin will try the endpoints
+                                one by one until a working one is found. The endpoint must be a valid url
+                                with host specified.
+                                The scheme, host and path from the endpoint URL will be used.
+                              items:
+                                type: string
+                              type: array
+                            rewrite:
+                              additionalProperties:
+                                type: string
+                              description: |-
+                                Rewrites are repository rewrite rules for a namespace. When fetching image resources
+                                from an endpoint and a key matches the repository via regular expression matching
+                                it will be replaced with the corresponding value from the map in the resource request.
+                              type: object
+                          type: object
+                        description: Mirrors are namespace to mirror mapping for all
+                          namespaces.
+                        type: object
+                    type: object
+                  replicas:
+                    description: Replicas is the number of replicas for the Control
+                      Plane.
+                    format: int32
+                    type: integer
+                  rolloutStrategy:
+                    description: The RolloutStrategy to use to replace control plane
+                      machines with new ones.
+                    properties:
+                      rollingUpdate:
+                        description: Rolling update config params. Present only if
+                          RolloutStrategyType = RollingUpdate.
+                        properties:
+                          maxSurge:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            description: |-
+                              The maximum number of control planes that can be scheduled above or under the
+                              desired number of control planes.
+                              Value can be an absolute number 1 or 0.
+                              Defaults to 1.
+                              Example: when this is set to 1, the control plane can be scaled
+                              up immediately when the rolling update starts.
+                            x-kubernetes-int-or-string: true
+                        type: object
+                      type:
+                        description: |-
+                          Type of rollout. Currently the only supported strategy is "RollingUpdate".
+                          Default is RollingUpdate.
+                        type: string
+                    type: object
+                  rotateCertificates:
+                    properties:
+                      generation:
+                        format: int64
+                        type: integer
+                      services:
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  rotateEncryptionKeys:
+                    properties:
+                      generation:
+                        format: int64
+                        type: integer
+                    type: object
+                  unmanagedConfig:
+                    type: boolean
+                  upgradeStrategy:
+                    properties:
+                      controlPlaneConcurrency:
+                        description: |-
+                          How many controlplane nodes should be upgrade at time, defaults to 1, 0 is infinite. Percentages are
+                          accepted too.
+                        type: string
+                      controlPlaneDrainOptions:
+                        properties:
+                          deleteEmptyDirData:
+                            description: Continue even if there are pods using emptyDir
+                            type: boolean
+                          disableEviction:
+                            description: DisableEviction forces drain to use delete
+                              rather than evict
+                            type: boolean
+                          enabled:
+                            description: Enable will require nodes be drained before
+                              upgrade
+                            type: boolean
+                          force:
+                            description: |-
+                              Drain node even if there are pods not managed by a ReplicationController, Job, or DaemonSet
+                              Drain will not proceed without Force set to true if there are such pods
+                            type: boolean
+                          gracePeriod:
+                            description: |-
+                              Period of time in seconds given to each pod to terminate gracefully.
+                              If negative, the default value specified in the pod will be used
+                            type: integer
+                          ignoreDaemonSets:
+                            description: |-
+                              If there are DaemonSet-managed pods, drain will not proceed without IgnoreDaemonSets set to true
+                              (even when set to true, kubectl won't delete pods - so setting default to true)
+                            type: boolean
+                          ignoreErrors:
+                            description: IgnoreErrors Ignore errors occurred between
+                              drain nodes in group
+                            type: boolean
+                          postDrainHooks:
+                            description: PostDrainHook A list of hooks to run after
+                              draining AND UPDATING a node
+                            items:
+                              properties:
+                                annotation:
+                                  description: |-
+                                    Annotation This annotation will need to be populated on the machine-plan secret with the value from the annotation
+                                    "rke.cattle.io/pre-drain" before the planner will continue with drain the specific node.  The annotation
+                                    "rke.cattle.io/pre-drain" is used for pre-drain and "rke.cattle.io/post-drain" is used for post drain.
+                                  type: string
+                              type: object
+                            type: array
+                          preDrainHooks:
+                            description: PreDrainHooks A list of hooks to run prior
+                              to draining a node
+                            items:
+                              properties:
+                                annotation:
+                                  description: |-
+                                    Annotation This annotation will need to be populated on the machine-plan secret with the value from the annotation
+                                    "rke.cattle.io/pre-drain" before the planner will continue with drain the specific node.  The annotation
+                                    "rke.cattle.io/pre-drain" is used for pre-drain and "rke.cattle.io/post-drain" is used for post drain.
+                                  type: string
+                              type: object
+                            type: array
+                          skipWaitForDeleteTimeoutSeconds:
+                            description: SkipWaitForDeleteTimeoutSeconds If pod DeletionTimestamp
+                              older than N seconds, skip waiting for the pod.  Seconds
+                              must be greater than 0 to skip.
+                            type: integer
+                          timeout:
+                            description: Time to wait (in seconds) before giving up
+                              for one try
+                            type: integer
+                        type: object
+                      workerConcurrency:
+                        description: How many workers should be upgraded at a time
+                        type: string
+                      workerDrainOptions:
+                        properties:
+                          deleteEmptyDirData:
+                            description: Continue even if there are pods using emptyDir
+                            type: boolean
+                          disableEviction:
+                            description: DisableEviction forces drain to use delete
+                              rather than evict
+                            type: boolean
+                          enabled:
+                            description: Enable will require nodes be drained before
+                              upgrade
+                            type: boolean
+                          force:
+                            description: |-
+                              Drain node even if there are pods not managed by a ReplicationController, Job, or DaemonSet
+                              Drain will not proceed without Force set to true if there are such pods
+                            type: boolean
+                          gracePeriod:
+                            description: |-
+                              Period of time in seconds given to each pod to terminate gracefully.
+                              If negative, the default value specified in the pod will be used
+                            type: integer
+                          ignoreDaemonSets:
+                            description: |-
+                              If there are DaemonSet-managed pods, drain will not proceed without IgnoreDaemonSets set to true
+                              (even when set to true, kubectl won't delete pods - so setting default to true)
+                            type: boolean
+                          ignoreErrors:
+                            description: IgnoreErrors Ignore errors occurred between
+                              drain nodes in group
+                            type: boolean
+                          postDrainHooks:
+                            description: PostDrainHook A list of hooks to run after
+                              draining AND UPDATING a node
+                            items:
+                              properties:
+                                annotation:
+                                  description: |-
+                                    Annotation This annotation will need to be populated on the machine-plan secret with the value from the annotation
+                                    "rke.cattle.io/pre-drain" before the planner will continue with drain the specific node.  The annotation
+                                    "rke.cattle.io/pre-drain" is used for pre-drain and "rke.cattle.io/post-drain" is used for post drain.
+                                  type: string
+                              type: object
+                            type: array
+                          preDrainHooks:
+                            description: PreDrainHooks A list of hooks to run prior
+                              to draining a node
+                            items:
+                              properties:
+                                annotation:
+                                  description: |-
+                                    Annotation This annotation will need to be populated on the machine-plan secret with the value from the annotation
+                                    "rke.cattle.io/pre-drain" before the planner will continue with drain the specific node.  The annotation
+                                    "rke.cattle.io/pre-drain" is used for pre-drain and "rke.cattle.io/post-drain" is used for post drain.
+                                  type: string
+                              type: object
+                            type: array
+                          skipWaitForDeleteTimeoutSeconds:
+                            description: SkipWaitForDeleteTimeoutSeconds If pod DeletionTimestamp
+                              older than N seconds, skip waiting for the pod.  Seconds
+                              must be greater than 0 to skip.
+                            type: integer
+                          timeout:
+                            description: Time to wait (in seconds) before giving up
+                              for one try
+                            type: integer
+                        type: object
+                    type: object
+                  version:
+                    pattern: (v\d\.\d{2}\.\d+\+rke2r\d)|^$
+                    type: string
+                required:
+                - localClusterAuthEndpoint
+                type: object
+              certificateRotationGeneration:
+                format: int64
+                type: integer
+              conditions:
+                items:
+                  properties:
+                    lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another.
+                      type: string
+                    lastUpdateTime:
+                      description: The last time this condition was updated.
+                      type: string
+                    message:
+                      description: Human-readable message indicating details about
+                        last transition
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type of cluster condition.
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              configGeneration:
+                format: int64
+                type: integer
+              etcdSnapshotCreate:
+                properties:
+                  generation:
+                    description: Changing the Generation is the only thing required
+                      to initiate a snapshot creation.
+                    type: integer
+                type: object
+              etcdSnapshotCreatePhase:
+                type: string
+              etcdSnapshotRestore:
+                properties:
+                  generation:
+                    description: Changing the Generation is the only thing required
+                      to initiate a snapshot restore.
+                    type: integer
+                  name:
+                    description: Name refers to the name of the associated etcdsnapshot
+                      object
+                    type: string
+                  restoreRKEConfig:
+                    description: Set to either none (or empty string), all, or kubernetesVersion
+                    type: string
+                type: object
+              etcdSnapshotRestorePhase:
+                type: string
+              initialized:
+                type: boolean
+              observedGeneration:
+                format: int64
+                type: integer
+              ready:
+                type: boolean
+              readyReplicas:
+                description: ReadyReplicas is the number of replicas current attached
+                  to this ControlPlane Resource and that have Ready Status.
+                format: int32
+                type: integer
+              replicas:
+                description: Replicas is the number of replicas current attached to
+                  this ControlPlane Resource.
+                format: int32
+                type: integer
+              rotateEncryptionKeys:
+                properties:
+                  generation:
+                    format: int64
+                    type: integer
+                type: object
+              rotateEncryptionKeysLeader:
+                type: string
+              rotateEncryptionKeysPhase:
+                type: string
+              unavailableReplicas:
+                description: UnavailableReplicas is the number of replicas current
+                  attached to this ControlPlane Resource and that are up-to-date with
+                  Control Plane config.
+                format: int32
+                type: integer
+              updatedReplicas:
+                description: UpdatedReplicas is the number of replicas current attached
+                  to this ControlPlane Resource and that are up-to-date with Control
+                  Plane config.
+                format: int32
+                type: integer
+              version:
+                description: |-
+                  Version represents the minimum Kubernetes version for the control plane machines
+                  in the cluster.
+                type: string
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,26 @@
+
+cat > kind-cluster-with-extramounts.yaml <<EOF
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  extraMounts:
+    - hostPath: /var/run/docker.sock
+      containerPath: /var/run/docker.sock
+  extraPortMappings:  # Expose the http port on the host
+  - containerPort: 6443
+    hostPort: 9443
+EOF
+kind create cluster --config kind-cluster-with-extramounts.yaml
+kind get kubeconfig > kubeconfig
+kubectl create clusterrolebinding --serviceaccount=capi-system:capi-manager --clusterrole=cluster-admin capi-cluster-admin
+export CLUSTER_TOPOLOGY=true
+clusterctl init --infrastructure docker
+kubectl apply -f pkg/crds/yaml/generated/
+
+
+for i in $(kubectl get crd | grep "rke.cattle.io" | awk '{print $1}'); do echo $i; kubectl get $i -A; done
+
+# Point the kubeconfig to the exposed port of the load balancer, rather than the inaccessible container IP.
+sed -i -e "s/server:.*/server: https:\/\/$(docker port capi-quickstart-lb 6443/tcp | sed "s/0.0.0.0/127.0.0.1/")/g" ./capi-quickstart.kubeconfig
+
