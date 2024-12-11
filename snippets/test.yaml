@@ -54,13 +54,14 @@ metadata:
     cluster.x-k8s.io/cluster-name: test-cluster
     rke.cattle.io/cluster-name: test-cluster
 spec:
+  clusterName: test-cluster
   machineGlobalConfig:
     kube-apiserver-arg: "anonymous-auth=true"
   kubernetesVersion: v1.27.4+rke2r1
   version: v1.27.4+rke2r1
   localClusterAuthEndpoint:
     enabled: false
-  replicas: 1
+  replicas: 3
   rolloutStrategy:
     type: "RollingUpdate"
   infrastructureRef:
@@ -68,4 +69,35 @@ spec:
     kind: DockerMachineTemplate
     name: dm-template-0
     namespace: default
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  name: test-cluster-md-0
+  namespace: default
+spec:
+  replicas: 2
+  clusterName: test-cluster
+  selector:
+    matchLabels:
+      cluster.x-k8s.io/cluster-name: test-cluster
+      pool: test-cluster-worker-pool-0
+  template:
+    metadata:
+      labels:
+        cluster.x-k8s.io/cluster-name: test-cluster
+        pool: test-cluster-worker-pool-0
+        rke.cattle.io/worker-role: "true"
+    spec:
+      version: v1.27.4+rke2r1
+      clusterName: test-cluster
+      bootstrap:
+        configRef:
+          apiVersion: rke.cattle.io/v1
+          kind: RKEBootstrapTemplate
+          name: bootstrap-template-0
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: DockerMachineTemplate
+        name: dm-template-0
 

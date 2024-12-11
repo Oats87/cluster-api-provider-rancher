@@ -143,24 +143,30 @@ func (h *handler) getBootstrapSecret(namespace, name string, envVars []corev1.En
 		ca = caprsettings.InternalCAChecksum()
 	}
 
-	logrus.Infof("[rkebootstrap] CA Checksum is: %s", ca)
-
 	serverURL := caprsettings.ServerURL.Get()
 	if serverURL == "" {
 		return nil, fmt.Errorf("unable to generate bootstrap secret due to lack of server URL setting")
 	}
 	var data []byte
-	if *machine.Spec.Version != "" {
+	if machine.Spec.Version != nil && *machine.Spec.Version != "" {
 		// assuming we're provisioning a capi-native machine so we need to just give the cloud-init a curl command
 		var checksumArg string
 		if ca != "" {
 			checksumArg = " --ca-checksum " + ca
 		}
-		command := fmt.Sprintf("curl --insecure -fL %s | sudo sh -s - --server %s --label 'cattle.io/os=linux' --token %s%s --controlplane --etcd --worker",
+		var roleArgs string
+		if _, ok := machine.Labels[capi.MachineControlPlaneLabel]; ok {
+			roleArgs = " --controlplane --etcd --worker" // TODO: this probably should taint the worker, but we have to satisfy the worker for the planner before it will actually provision a cluster
+		} else {
+			roleArgs = " --worker"
+		}
+
+		command := fmt.Sprintf("curl --insecure -fL %s | sudo sh -s - --server %s --label 'cattle.io/os=linux' --token %s%s%s",
 			serverURL+installer.SystemAgentInstallPath,
 			serverURL,
 			base64.URLEncoding.EncodeToString(hash[:]),
-			checksumArg)
+			checksumArg,
+			roleArgs)
 		data = []byte(fmt.Sprintf(basicCloudConfig, command))
 	} else {
 		is := installer.LinuxInstallScript
@@ -350,7 +356,7 @@ func (h *handler) GeneratingHandler(bootstrap *rkev1.RKEBootstrap, status rkev1.
 		h.rkeBootstrap.EnqueueAfter(bootstrap.Namespace, bootstrap.Name, 10*time.Second)
 		return result, status, generic.ErrSkip
 	}
-	if err != nil {
+	if err != nil || machine == nil {
 		logrus.Errorf("[rkebootstrap] %s/%s: error getting machine by owner reference %v", bootstrap.Namespace, bootstrap.Name, err)
 		return nil, status, err
 	}

@@ -60,7 +60,6 @@ func Register(wContext *caprcontext.Context, kcManager kubeconfig.Manager) {
 // associateMachineWithNode back-populates the provider ID and addresses from the K8s v1 Node object onto the
 // corresponding infrastructure machine object that is referenced by the bootstrap.
 func (h *handler) associateMachineWithNode(_ string, bootstrap *rkev1.RKEBootstrap) (*rkev1.RKEBootstrap, error) {
-	logrus.Infof("[machinenodelookup] associating machine")
 	if bootstrap == nil || bootstrap.DeletionTimestamp != nil {
 		return bootstrap, nil
 	}
@@ -68,7 +67,7 @@ func (h *handler) associateMachineWithNode(_ string, bootstrap *rkev1.RKEBootstr
 	if !bootstrap.Status.Ready || bootstrap.Status.DataSecretName == nil || *bootstrap.Status.DataSecretName == "" {
 		return bootstrap, nil
 	}
-	logrus.Infof("[machinenodelookup] bootstrap was ready")
+
 	machine, err := capr.GetMachineByOwner(h.machineCache, bootstrap)
 	if err != nil {
 		if errors.Is(err, capr.ErrNoMachineOwnerRef) {
@@ -81,7 +80,6 @@ func (h *handler) associateMachineWithNode(_ string, bootstrap *rkev1.RKEBootstr
 		// If the machine already has its provider ID set, then we do not need to continue
 		return bootstrap, nil
 	}
-	logrus.Infof("[machinenodelookup] getting infraref")
 	gvk := schema.FromAPIVersionAndKind(machine.Spec.InfrastructureRef.APIVersion, machine.Spec.InfrastructureRef.Kind)
 	infra, err := h.dynamic.Get(gvk, machine.Namespace, machine.Spec.InfrastructureRef.Name)
 	if apierror.IsNotFound(err) {
@@ -90,7 +88,6 @@ func (h *handler) associateMachineWithNode(_ string, bootstrap *rkev1.RKEBootstr
 		return bootstrap, err
 	}
 
-	logrus.Infof("[machinenodelookup] converting infra ref")
 	d, err := data.Convert(infra)
 	if err != nil {
 		return bootstrap, err
@@ -103,11 +100,9 @@ func (h *handler) associateMachineWithNode(_ string, bootstrap *rkev1.RKEBootstr
 		return bootstrap, nil
 	}
 
-	logrus.Infof("[machinenodelookup] infra was ready")
 	clusterName := machine.Spec.ClusterName
 	clusterNamespace := machine.Namespace
 
-	logrus.Infof("[machinenodelookup] getting rest config")
 	config, err := h.kubeconfigManager.GetRESTConfig(clusterNamespace, clusterName)
 	if err != nil {
 		return bootstrap, err
@@ -118,7 +113,6 @@ func (h *handler) associateMachineWithNode(_ string, bootstrap *rkev1.RKEBootstr
 		return bootstrap, err
 	}
 
-	logrus.Infof("[machinenodelookup] created client")
 	nodeLabelSelector := metav1.LabelSelector{MatchLabels: map[string]string{capr.MachineUIDLabel: string(machine.GetUID())}}
 	nodes, err := clientset.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{LabelSelector: labels.Set(nodeLabelSelector.MatchLabels).String()})
 	if err != nil || len(nodes.Items) == 0 || nodes.Items[0].Spec.ProviderID == "" || !condition.Cond("Ready").IsTrue(nodes.Items[0]) {

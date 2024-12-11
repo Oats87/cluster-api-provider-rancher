@@ -12,6 +12,7 @@ import (
 	rkecontroller "github.com/rancher/cluster-api-provider-rancher/pkg/generated/controllers/rke.cattle.io/v1"
 	caprplanner "github.com/rancher/cluster-api-provider-rancher/pkg/planner"
 	"github.com/rancher/lasso/pkg/dynamic"
+	"github.com/rancher/wrangler/v3/pkg/condition"
 	"github.com/rancher/wrangler/v3/pkg/data"
 	"github.com/rancher/wrangler/v3/pkg/name"
 	"github.com/sirupsen/logrus"
@@ -93,31 +94,31 @@ func (h *handler) GenerateMachinesAndRKEBootstrap(controlplane *rkev1.RKEControl
 	currentReplicaCount := int32(len(machines.Items))
 
 	for _, existingMachine := range machines.Items {
-		// retrieve the rkebootstrap cache for this object
-		existingBootstrap, err := h.bootstrapCache.Get(existingMachine.Spec.Bootstrap.ConfigRef.Namespace, existingMachine.Spec.Bootstrap.ConfigRef.Name)
-		if err != nil {
-			return nil, status, err // return nil here because we don't want to just clobber all of the machines if this doesn't work
-		}
-		gvk := schema.FromAPIVersionAndKind(existingMachine.Spec.InfrastructureRef.APIVersion, existingMachine.Spec.InfrastructureRef.Kind)
-		existingIO, err := h.dynamic.Get(gvk, existingMachine.Spec.InfrastructureRef.Namespace, existingMachine.Spec.InfrastructureRef.Name)
+		logrus.Infof("[rkecontrolplane standalone] Generating appliable machine/bootstrap/infraobject (%s/%s/%s) from existing machines", existingMachine.Name, existingMachine.Spec.Bootstrap.ConfigRef.Name, existingMachine.Spec.InfrastructureRef.Name)
+		io, err := h.createInfraObjectFromTemplate(controlplane, existingMachine.Name)
 		if err != nil {
 			return nil, status, err
 		}
-		logrus.Infof("[rkecontrolplane standalone] Appending existing machine/bootstrap/infraobject (%s/%s/%s) to object slice", existingMachine.Name, existingBootstrap.Name, existingMachine.Spec.InfrastructureRef.Name)
-		objects = append(objects, &existingMachine)
-		objects = append(objects, existingBootstrap.DeepCopy()) // put a copy of the bootstrap in because it is coming from the cache
-		objects = append(objects, existingIO)
+		machine, bootstrap := generateMachineAndRKEBootstrap(controlplane, existingMachine.Name, existingMachine.Spec.Bootstrap.ConfigRef.Name, corev1.ObjectReference{
+			APIVersion: io.GetAPIVersion(),
+			Kind:       io.GetKind(),
+			Name:       io.GetName(),
+			Namespace:  io.GetNamespace(),
+		})
+		objects = append(objects, io)
+		objects = append(objects, machine)
+		objects = append(objects, bootstrap)
 	}
 	// TODO: add filter to determine necessary scale based on rollout. for MVP we don't need this, we can just match the replica count.
 	for i := int32(0); i < (*controlplane.Spec.Replicas - currentReplicaCount); i++ {
 		nameSuffix := strconv.FormatInt(time.Now().Unix(), 10)
-		machineName := name.SafeConcatName(controlplane.Name+"-machine-", nameSuffix)
-		bootstrapName := name.SafeConcatName(controlplane.Name+"-bootstrap-", nameSuffix)
+		machineName := name.SafeConcatName(controlplane.Name, "machine", nameSuffix)
+		bootstrapName := name.SafeConcatName(controlplane.Name, "bootstrap", nameSuffix)
 		io, err := h.createInfraObjectFromTemplate(controlplane, machineName)
 		if err != nil {
 			return nil, status, err
 		}
-		logrus.Infof("[rkecontrolplane standalone] Generating machine: %s and bootstrap: %s with infra object: (%s) %s/%s", machineName, bootstrapName, io.GetKind(), io.GetNamespace(), io.GetName())
+		logrus.Infof("[rkecontrolplane standalone] Generating new machine: %s and bootstrap: %s with infra object: (%s) %s/%s", machineName, bootstrapName, io.GetKind(), io.GetNamespace(), io.GetName())
 		machine, bootstrap := generateMachineAndRKEBootstrap(controlplane, machineName, bootstrapName, corev1.ObjectReference{
 			APIVersion: io.GetAPIVersion(),
 			Kind:       io.GetKind(),
@@ -130,11 +131,14 @@ func (h *handler) GenerateMachinesAndRKEBootstrap(controlplane *rkev1.RKEControl
 	}
 
 	if status.Replicas != *controlplane.Spec.Replicas {
-		logrus.Infof("[rkecontrolplane standalone] Updating replica count on status of RKEControlPlane %s/%s to %d", controlplane.Namespace, controlplane.Name, controlplane.Spec.Replicas)
+		logrus.Tracef("[rkecontrolplane standalone] Updating replica count on status of RKEControlPlane %s/%s to %d", controlplane.Namespace, controlplane.Name, controlplane.Spec.Replicas)
 		status.Replicas = *controlplane.Spec.Replicas
 	}
 
 	status.AgentConnected = true // there is no agent with standalone
+	aCon := condition.Cond("Available")
+	aCon.True(&status)
+	status.Version = &controlplane.Spec.Version
 	return objects, status, err
 }
 
@@ -148,7 +152,7 @@ func (h *handler) createInfraObjectFromTemplate(controlplane *rkev1.RKEControlPl
 	// return error if apiversion and kind are empty
 
 	gvk := schema.FromAPIVersionAndKind(infraTemplateApiVersion, infraTemplateKind)
-	logrus.Infof("[rkecontrolplane standalone] GVK was: %s", gvk.String())
+	logrus.Infof("[rkecontrolplane standalone] GVK for the infrastructuremachinetemplate %s/%s was: %s", infraTemplateNamespace, infraTemplateName, gvk.String())
 	infraTemplate, err := h.dynamic.Get(gvk, infraTemplateNamespace, infraTemplateName)
 	if err != nil {
 		return nil, err
